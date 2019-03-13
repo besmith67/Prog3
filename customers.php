@@ -1,10 +1,21 @@
 <?php
+/* ---------------------------------------------------------------------------
+ * filename    : customers.php
+ * author      : Branden Smith, besmith2@svsu.edu
+ * description : Class that calls functions based on url input. Default shows list of customers
+ * ---------------------------------------------------------------------------
+ */
+session_start();
+if(!isset($_SESSION["custid"])){ // if "username" (email) is not set,
+	session_destroy();			// end session
+	header('Location: login.php');     // redirect to login page
+	exit;
+}
 
 // include the class that handles database connections
 require "database.php";
 
-// include the class containing functions/methods for "customer" table
-// Note: this application uses "customer" table, not "cusotmers" table
+// include the class containing functions/methods for "customers" table
 require "customers.class.php";
 $cust = new Customer();
  
@@ -18,7 +29,7 @@ if(isset($_POST["password"]))     $cust->password = $_POST["password"];
 
 // "fun" is short for "function" to be invoked 
 if(isset($_GET["fun"])) $fun = $_GET["fun"];
-else $fun = "display_list"; 
+else $fun = "display_list"; //default function if not specified
 
 switch ($fun) {
     case "display_list":        $cust->list_records();

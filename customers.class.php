@@ -1,5 +1,10 @@
 <?php
-
+/* ---------------------------------------------------------------------------
+ * filename    : customers.class.php
+ * author      : Branden Smith, besmith2@svsu.edu
+ * description : Customer Class that holds all functions used by customers.php
+ * ---------------------------------------------------------------------------
+ */
 class Customer { 
     public $id;
     public $name;
@@ -51,37 +56,16 @@ class Customer {
         $this->generate_html_bottom(4);
     } // end function delete_record()
     
-    /*
-     * This method inserts one record into the table, 
-     * and redirects user to List, IF user input is valid, 
-     * OTHERWISE it redirects user back to Create form, with errors
-     * - Input: user data from Create form
-     * - Processing: INSERT (SQL)
-     * - Output: None (This method does not generate HTML code,
-     *   it only changes the content of the database)
-     * - Precondition: Public variables set (name, email, mobile)
-     *   and database connection variables are set in datase.php.
-     *   Note that $id will NOT be set because the record 
-     *   will be a new record so the SQL database will "auto-number"
-     * - Postcondition: New record is added to the database table, 
-     *   and user is redirected to the List screen (if no errors), 
-     *   or Create form (if errors)
-     */
-    function insert_db_record () {
+	//Inserts form input into database
+    function insert_db_record () { 
         if ($this->fieldsAllValid()) { // validate user input
             // if valid data, insert record into table
             $pdo = Database::connect();
             $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 			$this->password_hashed = MD5($this->password);
-			// safe code
             $sql = "INSERT INTO $this->tableName (name,email,mobile, password_hash) values(?, ?, ?, ?)";
-			// dangerous code
-			//$sql = "INSERT INTO $this->tableName (name,email,mobile) values('$this->name', '$this->email', '$this->mobile')";
             $q = $pdo->prepare($sql);
-			// safe code
             $q->execute(array($this->name, $this->email, $this->mobile, $this->password_hashed));
-			// dangerous code
-			//$q->execute(array());
             Database::disconnect();
             header("Location: $this->tableName.php"); // go back to "list"
         }
@@ -92,6 +76,7 @@ class Customer {
         }
     } // end function insert_db_record
     
+	//Retrieves data from database to display and read
     private function select_db_record($id) {
         $pdo = Database::connect();
         $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
@@ -105,6 +90,7 @@ class Customer {
         $this->mobile = $data['mobile'];
     } // function select_db_record()
     
+	//Updates values of selected record
     function update_db_record ($id) {
         $this->id = $id;
         if ($this->fieldsAllValid()) {
@@ -123,6 +109,7 @@ class Customer {
         }
     } // end function update_db_record 
     
+	//Deletes selected database record
     function delete_db_record($id) {
         $pdo = Database::connect();
         $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
@@ -133,6 +120,7 @@ class Customer {
         header("Location: $this->tableName.php");
     } // end function delete_db_record()
     
+	//Creates top part of each form based on inputted function
     private function generate_html_top ($fun, $id=null) {
         switch ($fun) {
             case 1: // create
@@ -176,6 +164,7 @@ class Customer {
                     ";
     } // end function generate_html_top()
     
+	//Creates bottom part of each form based on inputted function
     private function generate_html_bottom ($fun) {
         switch ($fun) {
             case 1: // create
@@ -209,36 +198,12 @@ class Customer {
                     ";
     } // end function generate_html_bottom()
     
-	/*
-    private function generate_form_group ($label, $labelError, $val, $modifier="") {
-        echo "<div class='form-group";
-        echo !empty($labelError) ? ' alert alert-danger ' : '';
-        echo "'>";
-        echo "<label class='control-label'>$label &nbsp;</label>";
-        //echo "<div class='controls'>";
-        echo "<input "
-            . "name='$label' "
-            . "type='text' "
-            . "$modifier "
-            . "placeholder='$label' "
-            . "value='";
-        echo !empty($val) ? $val : '';
-        echo "'>";
-        if (!empty($labelError)) {
-            echo "<span class='help-inline'>";
-            echo "&nbsp;&nbsp;" . $labelError;
-            echo "</span>";
-        }
-        //echo "</div>"; // end div: class='controls'
-        echo "</div>"; // end div: class='form-group'
-    } // end function generate_form_group()
-	*/
+	 //Creates appropriate form based on inputted value
 	 private function generate_form_group ($label, $labelError, $val, $modifier="", $fieldType="text") {
         echo "<div class='form-group";
         echo !empty($labelError) ? ' alert alert-danger ' : '';
         echo "'>";
         echo "<label class='control-label'>$label &nbsp;</label>";
-        //echo "<div class='controls'>";
         echo "<input "
             . "name='$label' "
             . "type='$fieldType' "
@@ -252,10 +217,10 @@ class Customer {
             echo "&nbsp;&nbsp;" . $labelError;
             echo "</span>";
         }
-        //echo "</div>"; // end div: class='controls'
         echo "</div>"; // end div: class='form-group'
     } // end function generate_form_group()
     
+	//Checks if every value is valid and not empty in Form
     private function fieldsAllValid () {
         $valid = true;
         if (empty($this->name)) {
@@ -274,10 +239,15 @@ class Customer {
             $this->mobileError = 'Please enter Mobile phone number';
             $valid = false;
         }
+		if (empty($this->password)) {
+            $this->passwordError = 'Please enter Password phone number';
+            $valid = false;
+        }
         return $valid;
 		
     } // end function fieldsAllValid() 
     
+	//Displays main list of records from database
     function list_records() {
         echo "<!DOCTYPE html>
         <html>
@@ -292,13 +262,16 @@ class Customer {
         echo "
             </head>
             <body>
-                <a href='https://github.com/cis355/PhpProject1' target='_blank'>Github</a><br />
+                <a href='https://github.com/besmith67/Prog3.git' target='_blank'>Github</a><br />
+				<a href='http://csis.svsu.edu/~besmith2/cis355/Prog3_UML.png' target='_blank'>UML</a>
+				<a href='http://csis.svsu.edu/~besmith2/cis355/Prog03_Diagram' target='_blank'>Screen Flow</a>
                 <div class='container'>
                     <p class='row'>
                         <h3>$this->title" . "s" . "</h3>
                     </p>
                     <p>
                         <a href='$this->tableName.php?fun=display_create_form' class='btn btn-success'>Create</a>
+						<a href='logout.php' class='btn btn-warning'>Logout</a>
                     </p>
                     <div class='row'>
                         <table class='table table-striped table-bordered'>
