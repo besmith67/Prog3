@@ -93,7 +93,7 @@ class Customer {
 	//Updates values of selected record
     function update_db_record ($id) {
         $this->id = $id;
-        if ($this->fieldsAllValid()) {
+        if ($this->fieldsAllsValid()) {
             $this->noerrors = true;
             $pdo = Database::connect();
             $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
@@ -160,7 +160,7 @@ class Customer {
                         <p class='row'>
                             <h3>$funWord a $this->title</h3>
                         </p>
-                        <form class='form-horizontal' action='$this->tableName.php?fun=$funNext' method='post'>                        
+                        <form class='form-horizontal' action='$this->tableName.php?fun=$funNext' method='post' enctype='multipart/form-data'>                        
                     ";
     } // end function generate_html_top()
     
@@ -246,6 +246,27 @@ class Customer {
         return $valid;
 		
     } // end function fieldsAllValid() 
+	private function fieldsAllsValid () {
+        $valid = true;
+        if (empty($this->name)) {
+            $this->nameError = 'Please enter Name';
+            $valid = false;
+        }
+        if (empty($this->email)) {
+            $this->emailError = 'Please enter Email Address';
+            $valid = false;
+        } 
+        else if ( !filter_var($this->email,FILTER_VALIDATE_EMAIL) ) {
+            $this->emailError = 'Please enter a valid email address: me@mydomain.com';
+            $valid = false;
+        }
+        if (empty($this->mobile)) {
+            $this->mobileError = 'Please enter Mobile phone number';
+            $valid = false;
+        }
+        return $valid;
+		
+    } // end function fieldsAllsValid()
     
 	//Displays main list of records from database
     function list_records() {
